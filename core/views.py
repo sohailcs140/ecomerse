@@ -1,0 +1,189 @@
+"""
+Core views for the ecommerce application.
+"""
+
+from rest_framework import viewsets, permissions
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+
+from .models import Brand, Category, Color, Size, Tax, Coupon, HomeBanner, OrderStatus
+from .serializers import (
+    BrandSerializer, CategorySerializer, ColorSerializer, SizeSerializer,
+    TaxSerializer, CouponSerializer, HomeBannerSerializer, OrderStatusSerializer
+)
+
+
+class BrandViewSet(viewsets.ModelViewSet):
+    """
+    Brand viewset with CRUD operations.
+    """
+    queryset = Brand.objects.filter(status=True)
+    serializer_class = BrandSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    search_fields = ['name']
+    ordering_fields = ['name', 'created_at']
+    ordering = ['name']
+
+    def get_permissions(self):
+        """Allow public read access, require authentication for write operations."""
+        if self.action in ['list', 'retrieve', 'home_brands']:
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+    @action(detail=False, methods=['get'])
+    def home_brands(self, request):
+        """Get brands displayed on homepage."""
+        brands = self.queryset.filter(is_home=True)
+        serializer = self.get_serializer(brands, many=True)
+        return Response(serializer.data)
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    """
+    Category viewset with hierarchical support.
+    """
+    queryset = Category.objects.filter(status=True)
+    serializer_class = CategorySerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['parent_category']
+    search_fields = ['category_name']
+    ordering_fields = ['category_name', 'created_at']
+    ordering = ['category_name']
+
+    def get_permissions(self):
+        """Allow public read access, require authentication for write operations."""
+        if self.action in ['list', 'retrieve', 'main_categories', 'home_categories']:
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+    @action(detail=False, methods=['get'])
+    def main_categories(self, request):
+        """Get main categories (no parent)."""
+        categories = self.queryset.filter(parent_category__isnull=True)
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def home_categories(self, request):
+        """Get categories displayed on homepage."""
+        categories = self.queryset.filter(is_home=True)
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data)
+
+
+class ColorViewSet(viewsets.ModelViewSet):
+    """
+    Color viewset.
+    """
+    queryset = Color.objects.filter(status=True)
+    serializer_class = ColorSerializer
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['color']
+    ordering = ['color']
+
+    def get_permissions(self):
+        """Allow public read access, require authentication for write operations."""
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+
+class SizeViewSet(viewsets.ModelViewSet):
+    """
+    Size viewset.
+    """
+    queryset = Size.objects.filter(status=True)
+    serializer_class = SizeSerializer
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['size']
+    ordering = ['size']
+
+    def get_permissions(self):
+        """Allow public read access, require authentication for write operations."""
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+
+class TaxViewSet(viewsets.ModelViewSet):
+    """
+    Tax viewset.
+    """
+    queryset = Tax.objects.filter(status=True)
+    serializer_class = TaxSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class CouponViewSet(viewsets.ModelViewSet):
+    """
+    Coupon viewset.
+    """
+    queryset = Coupon.objects.filter(status=True)
+    serializer_class = CouponSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = ['code', 'title']
+
+    @action(detail=False, methods=['post'])
+    def validate_coupon(self, request):
+        """Validate coupon code."""
+        code = request.data.get('code')
+        order_amount = request.data.get('order_amount', 0)
+        
+        try:
+            coupon = Coupon.objects.get(code=code, status=True)
+            if order_amount < coupon.min_order_amt:
+                return Response({
+                    'valid': False, 
+                    'message': f'Minimum order amount is {coupon.min_order_amt}'
+                })
+            
+            discount = 0
+            if coupon.type == 'Value':
+                discount = coupon.value
+            else:  # Percentage
+                discount = (order_amount * coupon.value) / 100
+                
+            return Response({
+                'valid': True,
+                'discount': discount,
+                'coupon': CouponSerializer(coupon).data
+            })
+        except Coupon.DoesNotExist:
+            return Response({'valid': False, 'message': 'Invalid coupon code'})
+
+
+class HomeBannerViewSet(viewsets.ModelViewSet):
+    """
+    Home banner viewset.
+    """
+    queryset = HomeBanner.objects.filter(status=True)
+    serializer_class = HomeBannerSerializer
+    ordering = ['id']
+
+    def get_permissions(self):
+        """Allow public read access, require authentication for write operations."""
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+
+class OrderStatusViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Order status viewset (read-only).
+    """
+    queryset = OrderStatus.objects.all()
+    serializer_class = OrderStatusSerializer
+    permission_classes = [permissions.IsAuthenticated]

@@ -1,0 +1,147 @@
+[
+{"type":"header","version":"5.2.1","comment":"Export to JSON plugin for PHPMyAdmin"},
+{"type":"database","name":"ecom"},
+{"type":"table","name":"admins","database":"ecom","data":
+[
+{"id":"1","email":"vishal@gmail.com","password":"$2y$10$NBtdDa1XYMpcYYd3goJ5WeqRnh37VVkZ.iR6C6pbffqm6HXkukAsC","created_at":"2021-01-16 02:27:18","updated_at":"2021-01-16 21:36:21"}
+]
+}
+,{"type":"table","name":"brands","database":"ecom","data":
+[
+{"id":"1","name":"Nike","image":"1613553930.jpg","status":"1","is_home":"1","created_at":"2021-02-17 08:55:30","updated_at":"2021-02-17 08:55:30"},
+{"id":"2","name":"Adidas","image":"1613553941.jpg","status":"1","is_home":"1","created_at":"2021-02-17 08:55:41","updated_at":"2021-02-17 08:55:41"},
+{"id":"3","name":"Peter England","image":"1613554893.jpg","status":"1","is_home":"1","created_at":"2021-02-17 09:11:33","updated_at":"2021-02-17 09:11:33"}
+]
+}
+,{"type":"table","name":"cart","database":"ecom","data":
+[
+{"id":"7","user_id":"14","user_type":"Reg","qty":"1","product_id":"3","product_attr_id":"4","added_on":"2021-04-23 08:37:41"},
+{"id":"15","user_id":"8","user_type":"Reg","qty":"1","product_id":"2","product_attr_id":"3","added_on":"2021-04-28 02:12:14"},
+{"id":"17","user_id":"215289930","user_type":"Not-Reg","qty":"1","product_id":"1","product_attr_id":"1","added_on":"2025-09-19 06:13:10"}
+]
+}
+,{"type":"table","name":"categories","database":"ecom","data":
+[
+{"id":"1","category_name":"Man","category_slug":"man","parent_category_id":"0","category_image":"1613552454.jpg","is_home":"1","status":"1","created_at":"2021-02-17 08:30:54","updated_at":"2021-02-22 08:04:06"},
+{"id":"2","category_name":"Woman","category_slug":"woman","parent_category_id":"0","category_image":"1613553509.jpg","is_home":"1","status":"1","created_at":"2021-02-17 08:31:24","updated_at":"2021-02-17 08:48:29"},
+{"id":"3","category_name":"Kids","category_slug":"kids","parent_category_id":"0","category_image":"1613552512.jpg","is_home":"1","status":"1","created_at":"2021-02-17 08:31:52","updated_at":"2021-02-17 08:31:52"},
+{"id":"4","category_name":"Bag","category_slug":"bag","parent_category_id":"2","category_image":"1613553407.jpg","is_home":"1","status":"1","created_at":"2021-02-17 08:46:07","updated_at":"2021-02-22 07:42:42"},
+{"id":"5","category_name":"Shoes","category_slug":"shoes","parent_category_id":"3","category_image":null,"is_home":"0","status":"1","created_at":"2021-02-17 09:24:40","updated_at":"2021-02-17 09:24:40"}
+]
+}
+,{"type":"table","name":"colors","database":"ecom","data":
+[
+{"id":"1","color":"Black","status":"1","created_at":"2021-01-26 02:12:11","updated_at":"2021-01-28 10:15:28"},
+{"id":"2","color":"Red","status":"1","created_at":"2021-01-26 02:12:22","updated_at":"2021-01-28 09:02:42"},
+{"id":"3","color":"White","status":"1","created_at":"2021-02-17 09:01:35","updated_at":"2021-02-17 09:01:35"},
+{"id":"4","color":"Cream","status":"1","created_at":"2021-02-24 05:57:35","updated_at":"2021-02-24 05:57:35"},
+{"id":"5","color":"Green","status":"1","created_at":"2021-02-24 05:57:45","updated_at":"2021-02-24 05:57:45"},
+{"id":"6","color":"Purple","status":"1","created_at":"2021-02-24 05:57:57","updated_at":"2021-02-24 05:57:57"},
+{"id":"7","color":"Blue","status":"1","created_at":"2021-02-24 06:00:15","updated_at":"2021-02-24 06:00:15"},
+{"id":"8","color":"Yellow","status":"1","created_at":"2021-02-24 06:06:42","updated_at":"2021-02-24 06:06:42"}
+]
+}
+,{"type":"table","name":"coupons","database":"ecom","data":
+[
+{"id":"1","title":"Jan Coupon","code":"Jan2021","value":"140","type":"Value","min_order_amt":"1000","is_one_time":"0","status":"1","created_at":"2021-01-20 09:43:32","updated_at":"2021-01-30 06:12:55"},
+{"id":"4","title":"New Coupon","code":"New","value":"15","type":"Per","min_order_amt":"1000","is_one_time":"0","status":"1","created_at":"2021-02-05 07:32:37","updated_at":"2021-02-05 07:32:48"}
+]
+}
+,{"type":"table","name":"customers","database":"ecom","data":
+[
+{"id":"1","name":"Vishal Gupta","email":"vishal@gmail.com","mobile":"9999999999","password":"vishal","address":"Address1","city":"Delhi","state":"Delhi","zip":"111111","company":"My Company Name","gstin":"ABCDEGGST","status":"0","is_verify":"0","is_forgot_password":"0","rand_id":"","created_at":"2021-02-08 13:14:02","updated_at":"2021-02-08 08:16:54"},
+{"id":"8","name":"Vishal","email":"learnweblessons@gmail.com","mobile":"9999999999","password":"eyJpdiI6IlpFVW5ZenFmWUxQOHEvWC90TlhreXc9PSIsInZhbHVlIjoid1RBa1lWbEl4WGF1QjlsV1ZtMnB5QT09IiwibWFjIjoiZTUwOWU0MDYxNGQ3MjZhMmQ5OWZkMGE2Njc1Yjc1MGI5ZThkODFlNjNiMmUzN2Y5ZmI5NTgyNWQ1N2FhOTRkZCJ9","address":null,"city":null,"state":null,"zip":null,"company":null,"gstin":null,"status":"1","is_verify":"1","is_forgot_password":"1","rand_id":"302653259","created_at":"2021-03-12 08:09:52","updated_at":"2021-03-12 08:09:52"},
+{"id":"15","name":"Amit Gupta","email":"phpvishal@gmail.com","mobile":"9999999999","password":"eyJpdiI6IlpFVW5ZenFmWUxQOHEvWC90TlhreXc9PSIsInZhbHVlIjoid1RBa1lWbEl4WGF1QjlsV1ZtMnB5QT09IiwibWFjIjoiZTUwOWU0MDYxNGQ3MjZhMmQ5OWZkMGE2Njc1Yjc1MGI5ZThkODFlNjNiMmUzN2Y5ZmI5NTgyNWQ1N2FhOTRkZCJ9","address":"test","city":"asd","state":"asd","zip":"4534545345","company":null,"gstin":null,"status":"1","is_verify":"1","is_forgot_password":"0","rand_id":"165808257","created_at":"2021-04-23 08:16:10","updated_at":"2021-04-23 08:16:10"},
+{"id":"16","name":"Sami khan","email":"vksamiweb@gmail.com","mobile":"0317617686","password":"eyJpdiI6IjNFVDhPZ2NBOXkwbXBha0xvS1lRVFE9PSIsInZhbHVlIjoidXcxVW82N3ptRlczd3dyak5Rd2JPdz09IiwibWFjIjoiYjEwZGEwMDM1YjBlODgxNGMwZDRkNWU1NWQ1NjYwZWZiZDk0Nzc1Yjc2NjMzYzk3ODQ5ZTQ4YmRiZDM1ODg5OCIsInRhZyI6IiJ9","address":null,"city":null,"state":null,"zip":null,"company":null,"gstin":null,"status":"1","is_verify":"1","is_forgot_password":null,"rand_id":"695866353","created_at":"2025-09-17 01:18:02","updated_at":"2025-09-17 01:18:02"}
+]
+}
+,{"type":"table","name":"home_banners","database":"ecom","data":
+[
+{"id":"1","image":"1613593624.jpg","btn_txt":"SHOP NOW","btn_link":"http:\/\/google.com","status":"1","created_at":"2021-02-17 19:54:32","updated_at":"2021-02-17 19:57:33"},
+{"id":"2","image":"1613593671.jpg","btn_txt":null,"btn_link":null,"status":"1","created_at":"2021-02-17 19:57:51","updated_at":"2021-02-17 19:57:51"}
+]
+}
+,{"type":"table","name":"migrations","database":"ecom","data":
+[
+{"id":"1","migration":"2021_01_15_211334_create_admins_table","batch":"1"},
+{"id":"4","migration":"2021_01_15_215552_create_categories_table","batch":"2"},
+{"id":"5","migration":"2021_01_20_095632_create_coupons_table","batch":"3"},
+{"id":"10","migration":"2021_01_21_115714_create_ajaxes_table","batch":"4"},
+{"id":"12","migration":"2021_01_26_021550_create_sizes_table","batch":"5"},
+{"id":"13","migration":"2021_01_26_023140_create_colors_table","batch":"6"},
+{"id":"14","migration":"2021_01_28_104722_create_products_table","batch":"7"},
+{"id":"15","migration":"2021_02_03_114909_create_brands_table","batch":"8"},
+{"id":"16","migration":"2021_02_05_082218_create_taxes_table","batch":"9"},
+{"id":"17","migration":"2021_02_08_081113_create_customers_table","batch":"10"},
+{"id":"18","migration":"2021_02_17_200040_create_home_banners_table","batch":"11"}
+]
+}
+,{"type":"table","name":"orders","database":"ecom","data":
+[
+{"id":"1","customers_id":"8","name":"Vishal","email":"learnweblessons@gmail.com","mobile":"9999999999","address":"111- Block A","city":"Noida","state":"UP","pincode":"110076","coupon_code":"Jan2021","coupon_value":"140","order_status":"2","payment_type":"COD","payment_status":"Pending","payment_id":null,"txn_id":null,"total_amt":"2431","track_details":"Reached Noida","added_on":"2021-04-28 02:06:48"},
+{"id":"4","customers_id":"9","name":"Vishal","email":"learnweblessons@gmail.com","mobile":"9999999999","address":"321, A Block","city":"Noida","state":"UP","pincode":"110076","coupon_code":null,"coupon_value":"0","order_status":"1","payment_type":"Gateway","payment_status":"Success","payment_id":"MOJO1428605A42955789","txn_id":"f603950d38354bd2a72cb75b20d11fc3","total_amt":"2997","track_details":"On the way","added_on":"2021-04-28 02:09:23"},
+{"id":"6","customers_id":"16","name":"Sami khan","email":"vksamiweb@gmail.com","mobile":"0317617686","address":"swat","city":"lahore","state":"swat","pincode":"1212","coupon_code":null,"coupon_value":"0","order_status":"1","payment_type":"COD","payment_status":"Pending","payment_id":null,"txn_id":null,"total_amt":"20","track_details":null,"added_on":"2025-09-17 01:19:25"}
+]
+}
+,{"type":"table","name":"orders_details","database":"ecom","data":
+[
+{"id":"1","orders_id":"1","product_id":"1","products_attr_id":"1","price":"10","qty":"2"},
+{"id":"2","orders_id":"1","product_id":"3","products_attr_id":"4","price":"2411","qty":"1"},
+{"id":"7","orders_id":"4","product_id":"2","products_attr_id":"3","price":"1199","qty":"1"},
+{"id":"8","orders_id":"4","product_id":"4","products_attr_id":"5","price":"899","qty":"2"},
+{"id":"9","orders_id":"6","product_id":"1","products_attr_id":"1","price":"10","qty":"2"}
+]
+}
+,{"type":"table","name":"orders_status","database":"ecom","data":
+[
+{"id":"1","orders_status":"Placed"},
+{"id":"2","orders_status":"On The Way"},
+{"id":"3","orders_status":"Delivered"}
+]
+}
+,{"type":"table","name":"products","database":"ecom","data":
+[
+{"id":"1","category_id":"1","name":"Polo T Shirt","image":"4997922202.png","slug":"polo-t-shirt","brand":"1","model":"Polo T Shirt - Nike","short_desc":"<p>100% Original Products<\/p>\r\n\r\n<p>Free Delivery on order above Rs.&nbsp;799<\/p>\r\n\r\n<p>Pay on delivery might be available<\/p>\r\n\r\n<p>Easy 30 days returns and exchanges<\/p>\r\n\r\n<p>Try &amp; Buy might be available<\/p>","desc":null,"keywords":"Polo T Shirt, Polo T Shirt - Nike","technical_specification":null,"uses":"T Shirt For Man","warranty":"Easy 30 days returns and exchanges","lead_time":"Same day delivery","tax_id":"1","is_promo":"1","is_featured":"1","is_discounted":"1","is_tranding":"1","status":"1","created_at":"2021-02-17 09:00:59","updated_at":"2025-09-19 06:15:43"},
+{"id":"2","category_id":"1","name":"Peter England Blue Shirt","image":"1613555081.png","slug":"peter-england-blue-shirt","brand":"3","model":"Peter England Blue Shirt","short_desc":"<p>Make an impression in this blue check shirt, tailored in Super Slim Fit from Peter England Jeans by Peter England.<\/p>","desc":"<p>Brand : Peter England<br \/>\r\nSubbrand : Peter England Jeans<br \/>\r\nFit : Super Slim Fit<br \/>\r\nPattern : Check<br \/>\r\nOccasion : Casual<br \/>\r\nColor : Blue<br \/>\r\nMaterial : 100% Cotton<br \/>\r\nSleeves : Full Sleeves<br \/>\r\nCuffs : Regular Cuff<br \/>\r\nCollar : Regular Collar<br \/>\r\nProduct Type : Shirt<br \/>\r\nBrand Fit : Super Slim Fit<\/p>","keywords":"Brand : Peter England\r\nSubbrand : Peter England Jeans\r\nFit : Super Slim Fit\r\nPattern : Check\r\nOccasion : Casual\r\nColor : Blue\r\nMaterial : 100% Cotton\r\nSleeves : Full Sleeves\r\nCuffs : Regular Cuff\r\nCollar : Regular Collar\r\nProduct Type : Shirt\r\nBrand Fit : Super Slim Fit","technical_specification":null,"uses":"N\/A","warranty":"N\/A","lead_time":"Delivery in 3 days","tax_id":"1","is_promo":"0","is_featured":"1","is_discounted":"0","is_tranding":"1","status":"1","created_at":"2021-02-17 09:14:41","updated_at":"2021-02-17 09:14:41"},
+{"id":"3","category_id":"1","name":"Black Printed Sweatshirt","image":"1613555334.jpg","slug":"women-black-printed-as-sweatshirt","brand":"1","model":"Women Black Printed AS W NK ICNCLSH MIDLAYER Sweatshirt","short_desc":"<p>100% Original Products<\/p>\r\n\r\n<p>Free Delivery on order above Rs.&nbsp;799<\/p>\r\n\r\n<p>Pay on delivery might be available<\/p>\r\n\r\n<p>Easy 15 days returns and exchanges<\/p>\r\n\r\n<p>Try &amp; Buy might be available<\/p>","desc":"<p>Black printed sweatshirt<br \/>\r\nhas a mock collar<br \/>\r\nlong sleeves<br \/>\r\nhalf zipper closure<br \/>\r\nstraight hem<\/p>","keywords":"N\/A","technical_specification":null,"uses":"N\/A","warranty":"6 months against manufacturing defects (not valid on products with more than 20% discount)","lead_time":null,"tax_id":"1","is_promo":"0","is_featured":"0","is_discounted":"0","is_tranding":"1","status":"1","created_at":"2021-02-17 09:18:54","updated_at":"2021-03-08 19:05:25"},
+{"id":"4","category_id":"3","name":"Boy's Thrum K Running Shoes","image":"1613555948.jpg","slug":"boys-thrum-running-shoes","brand":"2","model":"Adidas Boy's Thrum K Running Shoes","short_desc":"<p>Closure: Lace-Up<br \/>\r\nShoe Width: Regular<br \/>\r\nOuter Material: Synthetic<br \/>\r\nClosure Type: Lace-Up<br \/>\r\nToe Style: Round Toe<br \/>\r\nWarranty Type: Manufacturer &amp; Seller<br \/>\r\nWarranty Description: 90 days<\/p>","desc":"<p><strong>Package Dimensions<\/strong> : 26.8 x 18.4 x 10.8 cm; 470 Grams<br \/>\r\n<strong>Date First Available<\/strong> : 18 December 2019<br \/>\r\n<strong>Manufacturer <\/strong>: ADIDAS<br \/>\r\n<strong>ASIN <\/strong>: B082WTQMLF<br \/>\r\n<strong>Item model number :<\/strong> CM6326<br \/>\r\n<strong>Department <\/strong>: Boys<br \/>\r\n<strong>Manufacturer <\/strong>: ADIDAS<br \/>\r\n<strong>Item Weight<\/strong> : 470 g<br \/>\r\n<strong>Package Dimensions : 26.8 x 18.4 x 10.8 cm; 470 Grams<br \/>\r\nDate First Available : 18 December 2019<br \/>\r\nManufacturer : ADIDAS<br \/>\r\nASIN : B082WTQMLF<br \/>\r\nItem model number : CM6326<br \/>\r\nDepartment : Boys<br \/>\r\nManufacturer : ADIDAS<br \/>\r\nItem Weight : 470 g<br \/>\r\nGeneric Name : Running Shoes<\/strong> : Running Shoes<\/p>","keywords":"N\/A","technical_specification":"<p>N\/A<\/p>","uses":"N\/A","warranty":"90 days","lead_time":null,"tax_id":"1","is_promo":"0","is_featured":"1","is_discounted":"0","is_tranding":"0","status":"1","created_at":"2021-02-17 09:29:08","updated_at":"2021-02-23 07:18:33"}
+]
+}
+,{"type":"table","name":"products_attr","database":"ecom","data":
+[
+{"id":"1","products_id":"1","sku":"111","attr_image":"705130315.jpg","mrp":"999","price":"10","qty":"5","size_id":"2","color_id":"1"},
+{"id":"2","products_id":"1","sku":"112","attr_image":"509937030.jpg","mrp":"999","price":"749","qty":"3","size_id":"1","color_id":"7"},
+{"id":"3","products_id":"2","sku":"124","attr_image":"499793402.png","mrp":"1499","price":"1199","qty":"3","size_id":"1","color_id":"1"},
+{"id":"4","products_id":"3","sku":"116","attr_image":"608075258.jpg","mrp":"3495","price":"2411","qty":"18","size_id":"0","color_id":"1"},
+{"id":"5","products_id":"4","sku":"121","attr_image":"115102277.jpg","mrp":"1071","price":"899","qty":"5","size_id":"0","color_id":"0"},
+{"id":"6","products_id":"1","sku":"113","attr_image":"216831743.jpg","mrp":"999","price":"749","qty":"23","size_id":"3","color_id":"8"},
+{"id":"7","products_id":"1","sku":"114","attr_image":"436707592.jpg","mrp":"999","price":"749","qty":"31","size_id":"2","color_id":"5"}
+]
+}
+,{"type":"table","name":"product_images","database":"ecom","data":
+[
+{"id":"1","products_id":"1","images":"334424773.jpg"},
+{"id":"5","products_id":"1","images":"546654238.jpg"},
+{"id":"6","products_id":"1","images":"476621397.jpg"}
+]
+}
+,{"type":"table","name":"product_review","database":"ecom","data":
+[
+{"id":"1","customer_id":"8","products_id":"2","rating":"Very Good","review":"I really like this product","status":"1","added_on":"2021-05-06 05:25:19"},
+{"id":"2","customer_id":"15","products_id":"2","rating":"Fantastic","review":"Very good quality at this price","status":"1","added_on":"2021-05-06 05:26:08"}
+]
+}
+,{"type":"table","name":"sizes","database":"ecom","data":
+[
+{"id":"1","size":"XXL","status":"1","created_at":"2021-01-26 01:56:46","updated_at":"2021-01-28 10:15:24"},
+{"id":"2","size":"XL","status":"1","created_at":"2021-02-24 05:58:04","updated_at":"2021-02-24 05:58:04"},
+{"id":"3","size":"L","status":"1","created_at":"2021-02-24 05:58:08","updated_at":"2021-02-24 05:58:08"},
+{"id":"4","size":"M","status":"1","created_at":"2021-02-24 05:58:13","updated_at":"2021-02-24 05:58:13"}
+]
+}
+,{"type":"table","name":"taxs","database":"ecom","data":
+[
+{"id":"1","tax_desc":"GST 12%","tax_value":"12","status":"1","created_at":"2021-02-05 08:05:43","updated_at":"2021-02-05 08:05:55"}
+]
+}
+]

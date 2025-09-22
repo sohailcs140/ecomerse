@@ -1,0 +1,158 @@
+[
+  {
+    "model": "core.brand",
+    "pk": 1,
+    "fields": {
+      "name": "Nike",
+      "image": "brands/nike.jpg",
+      "status": true,
+      "is_home": true,
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.brand",
+    "pk": 2,
+    "fields": {
+      "name": "Adidas",
+      "image": "brands/adidas.jpg",
+      "status": true,
+      "is_home": true,
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.category",
+    "pk": 1,
+    "fields": {
+      "category_name": "Men",
+      "category_slug": "men",
+      "parent_category": null,
+      "category_image": "categories/men.jpg",
+      "is_home": true,
+      "status": true,
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.category",
+    "pk": 2,
+    "fields": {
+      "category_name": "Women",
+      "category_slug": "women",
+      "parent_category": null,
+      "category_image": "categories/women.jpg",
+      "is_home": true,
+      "status": true,
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.color",
+    "pk": 1,
+    "fields": {
+      "color": "Black",
+      "status": true,
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.color",
+    "pk": 2,
+    "fields": {
+      "color": "White",
+      "status": true,
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.size",
+    "pk": 1,
+    "fields": {
+      "size": "S",
+      "status": true,
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.size",
+    "pk": 2,
+    "fields": {
+      "size": "M",
+      "status": true,
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.size",
+    "pk": 3,
+    "fields": {
+      "size": "L",
+      "status": true,
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.tax",
+    "pk": 1,
+    "fields": {
+      "tax_desc": "GST 12%",
+      "tax_value": "12.00",
+      "status": true,
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.orderstatus",
+    "pk": 1,
+    "fields": {
+      "orders_status": "Placed"
+    }
+  },
+  {
+    "model": "core.orderstatus",
+    "pk": 2,
+    "fields": {
+      "orders_status": "Processing"
+    }
+  },
+  {
+    "model": "core.orderstatus",
+    "pk": 3,
+    "fields": {
+      "orders_status": "Shipped"
+    }
+  },
+  {
+    "model": "core.orderstatus",
+    "pk": 4,
+    "fields": {
+      "orders_status": "Delivered"
+    }
+  },
+  {
+    "model": "core.coupon",
+    "pk": 1,
+    "fields": {
+      "title": "Welcome Discount",
+      "code": "WELCOME10",
+      "value": "10.00",
+      "type": "Per",
+      "min_order_amt": "500.00",
+      "is_one_time": false,
+      "status": true,
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z"
+    }
+  }
+]
