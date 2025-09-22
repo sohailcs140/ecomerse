@@ -102,7 +102,7 @@ ecommerce_api/
 1. **Clone the repository**
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/sohailcs140/ecomerse.git
    cd ecommerce_api
    ```
 
