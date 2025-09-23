@@ -54,7 +54,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
     filterset_class = CategoryFilter
     lookup_field = "category_slug"
     lookup_url_kwarg = "category"
-
+    pagination_class = None
+    
     def get_permissions(self):
         if self.action in ['list', 'retrieve', 'main_categories', 'home_categories']:
             permission_classes = [permissions.AllowAny]
