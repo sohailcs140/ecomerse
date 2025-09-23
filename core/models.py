@@ -59,6 +59,10 @@ class Category(TimestampedModel):
         verbose_name_plural = 'categories'
         ordering = ['category_name']
 
+    @property
+    def product_count(self):
+        return self.products.count()
+
 
 class Color(TimestampedModel):
     """

@@ -4,7 +4,7 @@ Core serializers for the ecommerce application.
 
 from rest_framework import serializers
 from .models import Brand, Category, Color, Size, Tax, Coupon, HomeBanner, OrderStatus
-
+from django.db import models
 
 class BrandSerializer(serializers.ModelSerializer):
     """
@@ -21,6 +21,7 @@ class CategorySerializer(serializers.ModelSerializer):
     """
     subcategories = serializers.SerializerMethodField()
     parent_category_name = serializers.CharField(source='parent_category.category_name', read_only=True)
+    product_count = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Category
@@ -30,6 +31,25 @@ class CategorySerializer(serializers.ModelSerializer):
         if obj.subcategories.exists():
             return CategorySerializer(obj.subcategories.filter(status=True), many=True).data
         return []
+    
+    def get_product_count(self, obj):
+        return obj.product_count
+
+
+class CategoryKpisSerializer(serializers.Serializer):
+    active_categories_count = serializers.SerializerMethodField()
+    inactive_categories_count = serializers.SerializerMethodField()
+    category_with_products_count = serializers.SerializerMethodField()
+
+    def get_active_categories_count(self, obj):
+        return Category.objects.filter(status=True).count()
+
+    def get_inactive_categories_count(self, obj):
+        return Category.objects.filter(status=False).count()
+
+    def get_category_with_products_count(self, obj):
+        return Category.objects.annotate(product_count=models.Count('products')).filter(product_count__gt=0).count()
+
 
 
 class ColorSerializer(serializers.ModelSerializer):

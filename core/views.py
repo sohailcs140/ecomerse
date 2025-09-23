@@ -11,8 +11,9 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import Brand, Category, Color, Size, Tax, Coupon, HomeBanner, OrderStatus
 from .serializers import (
     BrandSerializer, CategorySerializer, ColorSerializer, SizeSerializer,
-    TaxSerializer, CouponSerializer, HomeBannerSerializer, OrderStatusSerializer
+    TaxSerializer, CouponSerializer, HomeBannerSerializer, OrderStatusSerializer, CategoryKpisSerializer
 )
+from .filters import CategoryFilter
 
 
 class BrandViewSet(viewsets.ModelViewSet):
@@ -43,38 +44,42 @@ class BrandViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    """
-    Category viewset with hierarchical support.
-    """
-    queryset = Category.objects.filter(status=True)
+    queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['parent_category']
+    filterset_fields = ['parent_category__slug']  # use slug instead of id
     search_fields = ['category_name']
     ordering_fields = ['category_name', 'created_at']
     ordering = ['category_name']
+    filterset_class = CategoryFilter
+    lookup_field = "slug"
+    lookup_url_kwarg = "category"    
 
     def get_permissions(self):
-        """Allow public read access, require authentication for write operations."""
         if self.action in ['list', 'retrieve', 'main_categories', 'home_categories']:
             permission_classes = [permissions.AllowAny]
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], url_path='main-categories')
     def main_categories(self, request):
-        """Get main categories (no parent)."""
         categories = self.queryset.filter(parent_category__isnull=True)
         serializer = self.get_serializer(categories, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], url_path='home-categories')
     def home_categories(self, request):
-        """Get categories displayed on homepage."""
         categories = self.queryset.filter(is_home=True)
         serializer = self.get_serializer(categories, many=True)
         return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'], url_path='category-kpis')
+    def get_category_kpis(self, request):
+        kpis = CategoryKpisSerializer(instance={})
+        print(kpis.data)
+        return Response(kpis.data)
+
 
 
 class ColorViewSet(viewsets.ModelViewSet):
