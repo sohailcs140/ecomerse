@@ -47,13 +47,13 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['parent_category__slug']  # use slug instead of id
+    filterset_fields = ['parent_category__category_slug']  # use slug instead of id
     search_fields = ['category_name']
     ordering_fields = ['category_name', 'created_at']
     ordering = ['category_name']
     filterset_class = CategoryFilter
-    lookup_field = "slug"
-    lookup_url_kwarg = "category"    
+    lookup_field = "category_slug"
+    lookup_url_kwarg = "category"
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve', 'main_categories', 'home_categories']:
