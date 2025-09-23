@@ -14,9 +14,11 @@ def create_customer_profile(sender, instance, created, **kwargs):
     Create a customer profile when a new user with user_type='customer' is created.
     """
     if created and instance.user_type == 'customer':
+        # Use email as default name since username can be null
+        default_name = instance.username or instance.email.split('@')[0]
         Customer.objects.create(
             user=instance,
-            name=instance.username,  # Default name to username
+            name=default_name,
             mobile=getattr(instance, 'mobile', '') or ''
         )
 

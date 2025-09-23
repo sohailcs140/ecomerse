@@ -16,7 +16,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'confirm_password', 'user_type', 'mobile']
+        fields = ['email', 'password', 'confirm_password', 'user_type', 'mobile']
 
     def validate(self, attrs):
         if attrs['password'] != attrs['confirm_password']:
@@ -34,25 +34,22 @@ class UserLoginSerializer(serializers.Serializer):
     """
     User login serializer.
     """
-    username = serializers.CharField()
+    email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        username = attrs.get('username')
+        email = attrs.get('email')
         password = attrs.get('password')
 
-        if username and password:
-            user = authenticate(username=username, password=password)
+        if email and password:
+            user = authenticate(username=email, password=password)
             if user:
-                if user.is_active:
-                    attrs['user'] = user
-                    return attrs
-                else:
-                    raise serializers.ValidationError('User account is disabled.')
+                attrs['user'] = user
+                return attrs
             else:
                 raise serializers.ValidationError('Invalid credentials.')
         else:
-            raise serializers.ValidationError('Must include username and password.')
+            raise serializers.ValidationError('Must include email and password.')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -61,5 +58,5 @@ class UserSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'user_type', 'mobile', 'is_verified', 'date_joined']
-        read_only_fields = ['id', 'date_joined']
+        fields = ['id', 'email', 'user_type', 'mobile', 'date_joined']
+        read_only_fields = ['id', 'user_type', 'date_joined']
