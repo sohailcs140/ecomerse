@@ -80,7 +80,7 @@ class ProductListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'image', 'slug', 'brand_name', 'category_name',
             'short_desc', 'min_price', 'max_price', 'avg_rating', 'review_count',
-            'is_promo', 'is_featured', 'is_discounted', 'is_tranding'
+            'is_promo', 'is_featured', 'is_discounted', 'is_arrival'
         ]
 
     def get_min_price(self, obj):
@@ -145,7 +145,7 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         fields = [
             'category', 'name', 'image', 'brand', 'model', 'short_desc', 'desc',
             'keywords', 'technical_specification', 'uses', 'warranty', 'lead_time',
-            'tax', 'is_promo', 'is_featured', 'is_discounted', 'is_tranding',
+            'tax', 'is_promo', 'is_featured', 'is_discounted', 'is_arrival',
             'status', 'images', 'attributes'
         ]
 

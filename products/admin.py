@@ -19,7 +19,7 @@ class ProductImageInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['name', 'category', 'brand', 'status', 'is_featured', 'is_promo', 'created_at']
-    list_filter = ['status', 'is_featured', 'is_promo', 'is_discounted', 'is_tranding', 'category', 'brand']
+    list_filter = ['status', 'is_featured', 'is_promo', 'is_discounted', 'is_arrival', 'category', 'brand']
     search_fields = ['name', 'keywords']
     prepopulated_fields = {'slug': ('name',)}
     inlines = [ProductAttributeInline, ProductImageInline]
