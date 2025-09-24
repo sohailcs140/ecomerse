@@ -16,6 +16,15 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ProductImageCreateSerializer(serializers.ModelSerializer):
+    """
+    Product image serializer for creation (without product field).
+    """
+    class Meta:
+        model = ProductImage
+        fields = ['image']
+
+
 class ProductAttributeSerializer(serializers.ModelSerializer):
     """
     Product attribute serializer.
@@ -32,6 +41,15 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
         if obj.mrp > obj.price:
             return round(((obj.mrp - obj.price) / obj.mrp) * 100, 2)
         return 0
+
+
+class ProductAttributeCreateSerializer(serializers.ModelSerializer):
+    """
+    Product attribute serializer for creation (without product field).
+    """
+    class Meta:
+        model = ProductAttribute
+        fields = ['sku', 'attr_image', 'mrp', 'price', 'qty', 'size', 'color']
 
 
 class ProductReviewSerializer(serializers.ModelSerializer):
@@ -113,3 +131,66 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
     def get_review_count(self, obj):
         return obj.reviews.filter(status=True).count()
+
+
+class ProductCreateUpdateSerializer(serializers.ModelSerializer):
+    """
+    Product serializer for creation and update with nested images and attributes.
+    """
+    images = ProductImageCreateSerializer(many=True, required=False)
+    attributes = ProductAttributeCreateSerializer(many=True, required=False)
+
+    class Meta:
+        model = Product
+        fields = [
+            'category', 'name', 'image', 'brand', 'model', 'short_desc', 'desc',
+            'keywords', 'technical_specification', 'uses', 'warranty', 'lead_time',
+            'tax', 'is_promo', 'is_featured', 'is_discounted', 'is_tranding',
+            'status', 'images', 'attributes'
+        ]
+
+    def create(self, validated_data):
+        # Extract nested data
+        images_data = validated_data.pop('images', [])
+        attributes_data = validated_data.pop('attributes', [])
+        
+        # Create the product
+        product = Product.objects.create(**validated_data)
+        
+        # Create associated images
+        for image_data in images_data:
+            ProductImage.objects.create(product=product, **image_data)
+        
+        # Create associated attributes
+        for attribute_data in attributes_data:
+            ProductAttribute.objects.create(product=product, **attribute_data)
+        
+        return product
+
+    def update(self, instance, validated_data):
+        # Extract nested data
+        images_data = validated_data.pop('images', [])
+        attributes_data = validated_data.pop('attributes', [])
+        
+        # Update the product
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Handle images update
+        if images_data is not None:
+            # Delete existing images if new ones are provided
+            instance.images.all().delete()
+            # Create new images
+            for image_data in images_data:
+                ProductImage.objects.create(product=instance, **image_data)
+        
+        # Handle attributes update
+        if attributes_data is not None:
+            # Delete existing attributes if new ones are provided
+            instance.attributes.all().delete()
+            # Create new attributes
+            for attribute_data in attributes_data:
+                ProductAttribute.objects.create(product=instance, **attribute_data)
+        
+        return instance

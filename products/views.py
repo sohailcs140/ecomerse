@@ -11,8 +11,8 @@ from django.db.models import Q
 
 from .models import Product, ProductAttribute, ProductImage, ProductReview
 from .serializers import (
-    ProductListSerializer, ProductDetailSerializer, ProductAttributeSerializer,
-    ProductImageSerializer, ProductReviewSerializer
+    ProductListSerializer, ProductDetailSerializer, ProductCreateUpdateSerializer,
+    ProductAttributeSerializer, ProductImageSerializer, ProductReviewSerializer
 )
 
 
@@ -20,7 +20,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     """
     Product viewset with advanced filtering and search.
     """
-    queryset = Product.objects.filter(status=True)
+    queryset = Product.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['category', 'brand', 'is_featured', 'is_promo', 'is_discounted', 'is_tranding']
     search_fields = ['name', 'keywords', 'short_desc']
@@ -31,6 +31,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return ProductDetailSerializer
+        elif self.action in ['create', 'update', 'partial_update']:
+            return ProductCreateUpdateSerializer
         return ProductListSerializer
 
     def get_permissions(self):
