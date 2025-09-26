@@ -37,3 +37,9 @@ class ProductReviewAdmin(admin.ModelAdmin):
     list_display = ['product', 'customer', 'rating', 'status', 'added_on']
     list_filter = ['rating', 'status']
     search_fields = ['product__name', 'customer__name']
+
+
+@admin.register(ProductImage)
+class ProductImageAdmin(admin.ModelAdmin):
+    list_display = ['product', 'image']
+    search_fields = ['product__name']

@@ -22,7 +22,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     """
     queryset = Product.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['category', 'brand', 'is_featured', 'is_promo', 'is_discounted', 'is_tranding']
+    filterset_fields = ['category', 'brand', 'is_featured', 'is_promo', 'is_discounted', 'is_arrival']
     search_fields = ['name', 'keywords', 'short_desc']
     ordering_fields = ['name', 'created_at']
     ordering = ['-created_at']

@@ -47,6 +47,11 @@ class ProductAttributeCreateSerializer(serializers.ModelSerializer):
     """
     Product attribute serializer for creation (without product field).
     """
+    mrp = serializers.DecimalField(max_digits=10, decimal_places=2)
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    qty = serializers.IntegerField()
+    attr_image = serializers.ImageField(required=False, allow_null=True)
+    
     class Meta:
         model = ProductAttribute
         fields = ['sku', 'attr_image', 'mrp', 'price', 'qty', 'size', 'color']
@@ -74,13 +79,15 @@ class ProductListSerializer(serializers.ModelSerializer):
     max_price = serializers.SerializerMethodField()
     avg_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
+    attributes = ProductAttributeSerializer(many=True, read_only=True)
+    images = ProductImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
         fields = [
             'id', 'name', 'image', 'slug', 'brand_name', 'category_name',
             'short_desc', 'min_price', 'max_price', 'avg_rating', 'review_count',
-            'is_promo', 'is_featured', 'is_discounted', 'is_arrival'
+            'is_promo', 'is_featured', 'is_discounted', 'is_arrival', 'attributes', 'images'
         ]
 
     def get_min_price(self, obj):
@@ -137,8 +144,13 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
     """
     Product serializer for creation and update with nested images and attributes.
     """
-    images = ProductImageCreateSerializer(many=True, required=False)
-    attributes = ProductAttributeCreateSerializer(many=True, required=False)
+    images = serializers.ListField(
+        child=serializers.ImageField(),
+        required=False,
+        allow_empty=True,
+        write_only=True
+    )
+    # Remove attributes field from serializer - we'll handle it manually
 
     class Meta:
         model = Product
@@ -146,31 +158,93 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
             'category', 'name', 'image', 'brand', 'model', 'short_desc', 'desc',
             'keywords', 'technical_specification', 'uses', 'warranty', 'lead_time',
             'tax', 'is_promo', 'is_featured', 'is_discounted', 'is_arrival',
-            'status', 'images', 'attributes'
+            'status', 'images'
         ]
+        read_only_fields = ['slug']
+
+    def parse_attributes_from_form_data(self, request_data):
+        """
+        Parse attributes from form data with array notation like attributes[0][sku].
+        """
+        attributes_data = []
+        
+        # Find all attribute indices
+        attribute_indices = set()
+        for key in request_data.keys():
+            if key.startswith('attributes[') and ']' in key:
+                # Extract index from attributes[0][field]
+                start = key.find('[') + 1
+                end = key.find(']')
+                if start > 0 and end > start:
+                    try:
+                        index = int(key[start:end])
+                        attribute_indices.add(index)
+                    except ValueError:
+                        continue
+        
+        # Build attributes data for each index
+        for index in sorted(attribute_indices):
+            attr_data = {}
+            
+            # Extract all fields for this attribute index
+            for key, value in request_data.items():
+                if key.startswith(f'attributes[{index}]['):
+                    # Extract field name from attributes[0][field]
+                    field_start = key.find('][', key.find('[')) + 2
+                    field_end = key.rfind(']')
+                    if field_start > 1 and field_end > field_start:
+                        field_name = key[field_start:field_end]
+                        attr_data[field_name] = value
+            
+            # Only add if we have some data
+            if attr_data:
+                # Handle empty attr_image
+                if 'attr_image' in attr_data and attr_data['attr_image'] == '':
+                    attr_data['attr_image'] = None
+                
+                # Validate the attribute data
+                temp_serializer = ProductAttributeCreateSerializer(data=attr_data)
+                if temp_serializer.is_valid():
+                    attributes_data.append(temp_serializer.validated_data)
+                else:
+                    print(f"Invalid attribute data for index {index}: {temp_serializer.errors}")
+        
+        return attributes_data
 
     def create(self, validated_data):
         # Extract nested data
         images_data = validated_data.pop('images', [])
-        attributes_data = validated_data.pop('attributes', [])
+        
+        # Get the original request data to parse attributes
+        request_data = self.context.get('request').data if self.context.get('request') else {}
+        attributes_data = self.parse_attributes_from_form_data(request_data)
         
         # Create the product
         product = Product.objects.create(**validated_data)
         
         # Create associated images
-        for image_data in images_data:
-            ProductImage.objects.create(product=product, **image_data)
+        for image_file in images_data:
+            ProductImage.objects.create(product=product, image=image_file)
         
         # Create associated attributes
-        for attribute_data in attributes_data:
-            ProductAttribute.objects.create(product=product, **attribute_data)
+        for i, attribute_data in enumerate(attributes_data):
+            print(f"Creating attribute {i}: {attribute_data}")
+            try:
+                ProductAttribute.objects.create(product=product, **attribute_data)
+                print(f"Successfully created attribute {i}")
+            except Exception as e:
+                print(f"Error creating attribute {i}: {e}")
+                print(f"Attribute data: {attribute_data}")
         
         return product
 
     def update(self, instance, validated_data):
         # Extract nested data
         images_data = validated_data.pop('images', [])
-        attributes_data = validated_data.pop('attributes', [])
+        
+        # Get the original request data to parse attributes
+        request_data = self.context.get('request').data if self.context.get('request') else {}
+        attributes_data = self.parse_attributes_from_form_data(request_data)
         
         # Update the product
         for attr, value in validated_data.items():
@@ -182,8 +256,8 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
             # Delete existing images if new ones are provided
             instance.images.all().delete()
             # Create new images
-            for image_data in images_data:
-                ProductImage.objects.create(product=instance, **image_data)
+            for image_file in images_data:
+                ProductImage.objects.create(product=instance, image=image_file)
         
         # Handle attributes update
         if attributes_data is not None:
@@ -194,3 +268,28 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
                 ProductAttribute.objects.create(product=instance, **attribute_data)
         
         return instance
+
+    def to_representation(self, instance):
+        """
+        Override to properly handle related objects in response.
+        """
+        data = super().to_representation(instance)
+        
+        # Add images and attributes to the response
+        try:
+            if hasattr(instance, 'images') and instance.pk:
+                data['images'] = ProductImageSerializer(instance.images.all(), many=True).data
+            else:
+                data['images'] = []
+        except:
+            data['images'] = []
+        
+        try:
+            if hasattr(instance, 'attributes') and instance.pk:
+                data['attributes'] = ProductAttributeSerializer(instance.attributes.all(), many=True).data
+            else:
+                data['attributes'] = []
+        except:
+            data['attributes'] = []
+        
+        return data
