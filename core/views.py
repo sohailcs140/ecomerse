@@ -186,9 +186,9 @@ class HomeBannerViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 
-class OrderStatusViewSet(viewsets.ReadOnlyModelViewSet):
+class OrderStatusViewSet(viewsets.ModelViewSet):
     """
-    Order status viewset (read-only).
+    Order status viewset.
     """
     queryset = OrderStatus.objects.all()
     serializer_class = OrderStatusSerializer
