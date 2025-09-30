@@ -11,9 +11,19 @@ class ProductImageSerializer(serializers.ModelSerializer):
     """
     Product image serializer.
     """
+    image = serializers.SerializerMethodField()
+    
     class Meta:
         model = ProductImage
         fields = '__all__'
+    
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
 
 
 class ProductImageCreateSerializer(serializers.ModelSerializer):
@@ -32,6 +42,7 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
     size_name = serializers.CharField(source='size.size', read_only=True)
     color_name = serializers.CharField(source='color.color', read_only=True)
     discount_percentage = serializers.SerializerMethodField()
+    attr_image = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductAttribute
@@ -41,6 +52,14 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
         if obj.mrp > obj.price:
             return round(((obj.mrp - obj.price) / obj.mrp) * 100, 2)
         return 0
+    
+    def get_attr_image(self, obj):
+        if obj.attr_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.attr_image.url)
+            return obj.attr_image.url
+        return None
 
 
 class ProductAttributeCreateSerializer(serializers.ModelSerializer):
@@ -150,6 +169,7 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         allow_empty=True,
         write_only=True
     )
+    image = serializers.SerializerMethodField()
     # Remove attributes field from serializer - we'll handle it manually
 
     class Meta:
@@ -161,6 +181,68 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
             'status', 'images'
         ]
         read_only_fields = ['slug']
+    
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+    def validate_attribute_data(self, attr_data, instance=None):
+        """
+        Validate attribute data with proper SKU uniqueness handling for updates.
+        """
+        # Handle empty attr_image
+        if 'attr_image' in attr_data and attr_data['attr_image'] == '':
+            attr_data['attr_image'] = None
+        
+        # Validate foreign key references exist (but keep as IDs for serializer validation)
+        if 'size' in attr_data and attr_data['size'] is not None:
+            from core.models import Size
+            try:
+                Size.objects.get(id=attr_data['size'])
+            except Size.DoesNotExist:
+                raise serializers.ValidationError({
+                    'size': f'Size with id {attr_data["size"]} does not exist.'
+                })
+        
+        if 'color' in attr_data and attr_data['color'] is not None:
+            from core.models import Color
+            try:
+                Color.objects.get(id=attr_data['color'])
+            except Color.DoesNotExist:
+                raise serializers.ValidationError({
+                    'color': f'Color with id {attr_data["color"]} does not exist.'
+                })
+        
+        # Check SKU uniqueness
+        sku = attr_data.get('sku')
+        if sku:
+            existing_attr = ProductAttribute.objects.filter(sku=sku).first()
+            if existing_attr:
+                # If we're updating and the existing attribute belongs to the same product, it's valid
+                if instance and instance.pk and existing_attr.product == instance:
+                    pass  # Valid for update
+                else:
+                    # SKU exists for a different product or this is a create operation
+                    raise serializers.ValidationError({
+                        'sku': 'Product Attribute with this sku already exists.'
+                    })
+        
+        # Validate other fields using the create serializer (with original IDs)
+        temp_serializer = ProductAttributeCreateSerializer(data=attr_data)
+        
+        if not temp_serializer.is_valid():
+            errors = temp_serializer.errors.copy()
+            # Remove SKU errors since we handled them above
+            if 'sku' in errors:
+                del errors['sku']
+            if errors:
+                raise serializers.ValidationError(errors)
+        
+        return attr_data
 
     def parse_attributes_from_form_data(self, request_data):
         """
@@ -196,18 +278,17 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
                         field_name = key[field_start:field_end]
                         attr_data[field_name] = value
             
-            # Only add if we have some data
+            # Only process if we have some data
             if attr_data:
-                # Handle empty attr_image
-                if 'attr_image' in attr_data and attr_data['attr_image'] == '':
-                    attr_data['attr_image'] = None
-                
-                # Validate the attribute data
-                temp_serializer = ProductAttributeCreateSerializer(data=attr_data)
-                if temp_serializer.is_valid():
-                    attributes_data.append(temp_serializer.validated_data)
-                else:
-                    print(f"Invalid attribute data for index {index}: {temp_serializer.errors}")
+                try:
+                    # Validate the attribute data with proper SKU handling
+                    validated_data = self.validate_attribute_data(attr_data, getattr(self, 'instance', None))
+                    attributes_data.append(validated_data)
+                except serializers.ValidationError as e:
+                    error_msg = f"Invalid attribute data for index {index}: {e.detail}"
+                    print(error_msg)
+                    # Re-raise the validation error so it's properly handled by the serializer
+                    raise e
         
         return attributes_data
 
@@ -217,8 +298,10 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         
         # Get the original request data to parse attributes
         request_data = self.context.get('request').data if self.context.get('request') else {}
+        # For create operations, no instance exists yet
+        self.instance = None
         attributes_data = self.parse_attributes_from_form_data(request_data)
-        
+
         # Create the product
         product = Product.objects.create(**validated_data)
         
@@ -244,6 +327,8 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         
         # Get the original request data to parse attributes
         request_data = self.context.get('request').data if self.context.get('request') else {}
+        # Pass the instance to the parsing method for proper validation
+        self.instance = instance
         attributes_data = self.parse_attributes_from_form_data(request_data)
         
         # Update the product
@@ -252,20 +337,75 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         instance.save()
         
         # Handle images update
-        if images_data is not None:
+        if images_data:
             # Delete existing images if new ones are provided
+            print("images_data", images_data)
             instance.images.all().delete()
             # Create new images
             for image_file in images_data:
                 ProductImage.objects.create(product=instance, image=image_file)
-        
+
+        print(attributes_data, "attributes_data")
         # Handle attributes update
-        if attributes_data is not None:
-            # Delete existing attributes if new ones are provided
-            instance.attributes.all().delete()
-            # Create new attributes
+        if attributes_data :
+            # Get existing attributes with their SKUs
+            existing_attributes = {attr.sku: attr for attr in instance.attributes.all()}
+            incoming_skus = {attr_data['sku'] for attr_data in attributes_data}
+            
+            # Delete attributes that are no longer in the incoming data
+            for sku, attr in existing_attributes.items():
+                if sku not in incoming_skus:
+                    attr.delete()
+            
+            # Update existing attributes or create new ones
             for attribute_data in attributes_data:
-                ProductAttribute.objects.create(product=instance, **attribute_data)
+                sku = attribute_data['sku']
+                if sku in existing_attributes:
+                    # Update existing attribute
+                    attr = existing_attributes[sku]
+                    for key, value in attribute_data.items():
+                        # Convert foreign key IDs to instances when assigning
+                        if key in ['size', 'color'] and value is not None:
+                            if key == 'size':
+                                from core.models import Size
+                                size_obj = Size.objects.get(id=value)
+                                setattr(attr, key, size_obj)
+                            elif key == 'color':
+                                from core.models import Color
+                                color_obj = Color.objects.get(id=value)
+                                setattr(attr, key, color_obj)
+                        else:
+                            setattr(attr, key, value)
+                    attr.save()
+                else:
+                    # Create new attribute - convert foreign key IDs to instances
+                    processed_data = attribute_data.copy()
+                    
+                    if 'size' in processed_data and processed_data['size'] is not None:
+                        from core.models import Size
+                        size_obj = Size.objects.get(id=processed_data['size'])
+                        processed_data['size'] = size_obj
+                    
+                    if 'color' in processed_data and processed_data['color'] is not None:
+                        from core.models import Color
+                        color_obj = Color.objects.get(id=processed_data['color'])
+                        processed_data['color'] = color_obj
+                    
+                    try:
+                        ProductAttribute.objects.create(product=instance, **processed_data)
+                    except Exception as e:
+                        print(f"Error creating attribute with SKU {sku}: {e}")
+                        # If there's still a unique constraint error, it might be due to race conditions
+                        # In that case, try to get the existing one and update it instead
+                        try:
+                            existing_attr = ProductAttribute.objects.get(sku=sku)
+                            for key, value in processed_data.items():
+                                setattr(existing_attr, key, value)
+                            existing_attr.product = instance
+                            existing_attr.save()
+                        except ProductAttribute.DoesNotExist:
+                            print(f"Could not resolve SKU conflict for {sku}")
+                            raise
         
         return instance
 
@@ -278,7 +418,12 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         # Add images and attributes to the response
         try:
             if hasattr(instance, 'images') and instance.pk:
-                data['images'] = ProductImageSerializer(instance.images.all(), many=True).data
+                image_serializer = ProductImageSerializer(
+                    instance.images.all(), 
+                    many=True, 
+                    context=self.context
+                )
+                data['images'] = image_serializer.data
             else:
                 data['images'] = []
         except:
@@ -286,7 +431,12 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         
         try:
             if hasattr(instance, 'attributes') and instance.pk:
-                data['attributes'] = ProductAttributeSerializer(instance.attributes.all(), many=True).data
+                attribute_serializer = ProductAttributeSerializer(
+                    instance.attributes.all(), 
+                    many=True, 
+                    context=self.context
+                )
+                data['attributes'] = attribute_serializer.data
             else:
                 data['attributes'] = []
         except:

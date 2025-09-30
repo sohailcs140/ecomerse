@@ -83,7 +83,8 @@ class ProductViewSet(viewsets.ModelViewSet):
         # Price range filter
         min_price = request.query_params.get('min_price')
         max_price = request.query_params.get('max_price')
-        
+        ordering = request.query_params.get("ordering")
+
         if min_price:
             queryset = queryset.filter(attributes__price__gte=min_price)
         if max_price:
@@ -108,9 +109,12 @@ class ProductViewSet(viewsets.ModelViewSet):
         sizes = request.query_params.getlist('sizes')
         if sizes:
             queryset = queryset.filter(attributes__size__id__in=sizes)
-            
+
         queryset = queryset.distinct()
-        
+
+        if ordering:
+            queryset = queryset.order_by(ordering)
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
