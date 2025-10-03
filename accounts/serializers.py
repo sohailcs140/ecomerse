@@ -16,7 +16,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'confirm_password', 'user_type', 'mobile']
+        fields = ['email', 'password', 'confirm_password', 'user_type', 'mobile', "first_name", "last_name"]
 
     def validate(self, attrs):
         if attrs['password'] != attrs['confirm_password']:
@@ -24,9 +24,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        print(validated_data, "*"*10)
         validated_data.pop('confirm_password')
         user = User.objects.create_user(**validated_data)
-        # Customer profile will be created automatically by signals
         return user
 
 

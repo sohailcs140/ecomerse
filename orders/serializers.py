@@ -2,6 +2,8 @@
 Order serializers for the ecommerce application.
 """
 
+from dataclasses import fields
+from products.models import Product
 from rest_framework import serializers
 from .models import Order, OrderDetail, Cart
 from products.serializers import ProductListSerializer, ProductAttributeSerializer
@@ -33,12 +35,20 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['customer', 'added_on']
 
+class CartProductSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Product
+        fields = [
+            "id", "name", "slug",
+        ]
+
 
 class CartSerializer(serializers.ModelSerializer):
     """
     Cart serializer.
     """
-    product = ProductListSerializer(read_only=True)
+    product = CartProductSerializer(read_only=True)
     product_attr = ProductAttributeSerializer(read_only=True)
     total_price = serializers.SerializerMethodField()
 

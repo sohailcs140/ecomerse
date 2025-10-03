@@ -335,7 +335,7 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-        
+        print(images_data, "images_data")
         # Handle images update
         if images_data:
             # Delete existing images if new ones are provided

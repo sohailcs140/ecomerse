@@ -92,7 +92,8 @@ class ColorViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['color']
     ordering = ['color']
-
+    pagination_class = None
+    
     def get_permissions(self):
         """Allow public read access, require authentication for write operations."""
         if self.action in ['list', 'retrieve']:
@@ -111,6 +112,7 @@ class SizeViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['size']
     ordering = ['size']
+    pagination_class = None
 
     def get_permissions(self):
         """Allow public read access, require authentication for write operations."""
@@ -128,7 +130,7 @@ class TaxViewSet(viewsets.ModelViewSet):
     queryset = Tax.objects.filter(status=True)
     serializer_class = TaxSerializer
     permission_classes = [permissions.IsAuthenticated]
-
+    pagination_class = None
 
 class CouponViewSet(viewsets.ModelViewSet):
     """
@@ -139,6 +141,8 @@ class CouponViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [SearchFilter]
     search_fields = ['code', 'title']
+    pagination_class = None
+
 
     @action(detail=False, methods=['post'])
     def validate_coupon(self, request):
@@ -176,6 +180,7 @@ class HomeBannerViewSet(viewsets.ModelViewSet):
     queryset = HomeBanner.objects.filter(status=True)
     serializer_class = HomeBannerSerializer
     ordering = ['id']
+    pagination_class = None
 
     def get_permissions(self):
         """Allow public read access, require authentication for write operations."""
@@ -183,7 +188,8 @@ class HomeBannerViewSet(viewsets.ModelViewSet):
             permission_classes = [permissions.AllowAny]
         else:
             permission_classes = [permissions.IsAuthenticated]
-        return [permission() for permission in permission_classes]
+        return [permission() for permission in permission_classes]  
+    
 
 
 class OrderStatusViewSet(viewsets.ModelViewSet):
@@ -193,3 +199,4 @@ class OrderStatusViewSet(viewsets.ModelViewSet):
     queryset = OrderStatus.objects.all()
     serializer_class = OrderStatusSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None

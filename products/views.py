@@ -79,7 +79,6 @@ class ProductViewSet(viewsets.ModelViewSet):
     def search_advanced(self, request):
         """Advanced search with price range and other filters."""
         queryset = self.queryset
-        
         # Price range filter
         min_price = request.query_params.get('min_price')
         max_price = request.query_params.get('max_price')
