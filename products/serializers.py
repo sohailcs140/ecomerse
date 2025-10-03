@@ -169,7 +169,7 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         allow_empty=True,
         write_only=True
     )
-    image = serializers.SerializerMethodField()
+    # image = serializers.SerializerMethodField()  # Commented out to allow file uploads
     # Remove attributes field from serializer - we'll handle it manually
 
     class Meta:
@@ -182,13 +182,16 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['slug']
     
-    def get_image(self, obj):
-        if obj.image:
+    def to_representation(self, instance):
+        """Override to add image URL for responses"""
+        data = super().to_representation(instance)
+        if instance.image:
             request = self.context.get('request')
             if request:
-                return request.build_absolute_uri(obj.image.url)
-            return obj.image.url
-        return None
+                data['image'] = request.build_absolute_uri(instance.image.url)
+            else:
+                data['image'] = instance.image.url
+        return data
 
     def validate_attribute_data(self, attr_data, instance=None):
         """
