@@ -24,15 +24,23 @@ def create_payment_intent(request):
         # Get contact info and shipping address
         contact_info = order_data.get("contact_info", {})
         shipping_address = order_data.get("shipping_address", {})
-        is_coupon_applied = order_data.get("coupon_code", "").strip() != ""
         # Get or create pending order status
         order_status = OrderStatus.objects.filter(is_default=True).first()
-        coupon_value = Coupon.objects.get(code=order_data.get("coupon_code")).value
+        
+        # Handle coupon code 
+        coupon_code = order_data.get("coupon_code")
+        coupon_value = 0
+        if coupon_code:
+            try:
+                coupon = Coupon.objects.get(code=coupon_code)
+                coupon_value = coupon.value
+            except Coupon.DoesNotExist:
+                coupon_value = 0
         
         # Create order with all required fields and convert from paisa to rupees
         order = Order.objects.create(
             user=request.user,
-            name=f"{contact_info.get('firstName', '')} {contact_info.get('lastName', '')}".strip(),
+            name=f"{contact_info.get('firstName', '')} {contact_info.get('lastName', '')}".strip() or "Guest User",
             email=contact_info.get("emailAddress", ""),
             mobile=contact_info.get("phoneNumber", ""),
             address=shipping_address.get("streetAddress", ""),
@@ -64,7 +72,12 @@ def create_payment_intent(request):
         cart_items = order_data.get("cart_items", [])
         for item in cart_items:
             try:
-                product = Product.objects.get(id=item.get("product_id").get("id"))
+                # Handle product_id - it might be an object or a simple ID
+                product_id = item.get("product_id")
+                if isinstance(product_id, dict):
+                    product_id = product_id.get("id")
+                
+                product = Product.objects.get(id=product_id)
                 product_attr = ProductAttribute.objects.get(id=item.get("product_attr_id"))
                   
                 OrderDetail.objects.create(
