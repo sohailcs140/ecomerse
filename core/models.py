@@ -155,6 +155,7 @@ class OrderStatus(models.Model):
     Order status model.
     """
     orders_status = models.CharField(max_length=50)
+    is_default = models.BooleanField(default=False)
 
     def __str__(self):
         return self.orders_status

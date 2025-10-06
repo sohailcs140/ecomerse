@@ -7,7 +7,7 @@ from integrations.stripe.client import StripeClient
 from django.contrib.auth import get_user_model
 from products.models import Product, ProductAttribute
 from orders.models import OrderDetail
-
+from core.enums import PaymentStatus, PaymentType
 
 User = get_user_model()
 stripe_client = StripeClient()
@@ -25,11 +25,10 @@ def create_payment_intent(request):
         shipping_address = order_data.get("shipping_address", {})
         
         # Get or create pending order status
-        order_status, created = OrderStatus.objects.get_or_create(
-            orders_status="Pending"
-        )
+        order_status = OrderStatus.objects.filter(is_default=True).first()
+
         
-        # Create order with all required fields
+        # Create order with all required fields and convert from paisa to rupees
         order = Order.objects.create(
             user=request.user,
             name=f"{contact_info.get('firstName', '')} {contact_info.get('lastName', '')}".strip(),
@@ -42,9 +41,9 @@ def create_payment_intent(request):
             coupon_code=order_data.get("coupon_code"),
             coupon_value=order_data.get("discount", 0),
             order_status=order_status,
-            payment_type="Gateway",
-            payment_status="Pending",
-            total_amt=amount / 100,  # Convert from cents
+            payment_type=PaymentType.GATEWAY.value,
+            payment_status=PaymentStatus.PENDING.value,
+            total_amt=amount / 100,  # Convert from paisa to rupees
         )
 
         # Create Stripe payment intent

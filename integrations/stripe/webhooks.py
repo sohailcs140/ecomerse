@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from orders.models import Order
 from core.models import OrderStatus
 from .client import StripeClient
-
+from core.enums import PaymentStatus
 stripe_client = StripeClient()
 
 @csrf_exempt
@@ -33,27 +33,19 @@ def webhook_view(request):
     if event["type"] == "payment_intent.succeeded":
         intent = event["data"]["object"]
         order_id = intent["metadata"].get("order_id")
-        
-        # Get or create success order status
-        success_status, _ = OrderStatus.objects.get_or_create(orders_status="Success")
-        
-        # Update order status and payment status
+
+        # Update payment status
         Order.objects.filter(id=order_id).update(
-            order_status=success_status,
-            payment_status="Success"
+            payment_status=PaymentStatus.SUCCESS.value
         )
 
     elif event["type"] == "payment_intent.payment_failed":
         intent = event["data"]["object"]
         order_id = intent["metadata"].get("order_id")
         
-        # Get or create failed order status
-        failed_status, _ = OrderStatus.objects.get_or_create(orders_status="Failed")
-        
-        # Update order status and payment status
+        # Update payment status
         Order.objects.filter(id=order_id).update(
-            order_status=failed_status,
-            payment_status="Failed"
+            payment_status=PaymentStatus.FAILED.value
         )
 
     return HttpResponse(status=200)
