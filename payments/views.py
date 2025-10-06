@@ -6,7 +6,7 @@ from core.models import OrderStatus
 from integrations.stripe.client import StripeClient
 from django.contrib.auth import get_user_model
 from products.models import Product, ProductAttribute
-from orders.models import OrderDetail
+from orders.models import OrderDetail, Cart
 from core.enums import PaymentStatus, PaymentType
 
 User = get_user_model()
@@ -76,7 +76,9 @@ def create_payment_intent(request):
             except (Product.DoesNotExist, ProductAttribute.DoesNotExist) as e:
                 print(f"Error creating order detail for item {item}: {e}")
                 continue
-
+        
+        Cart.objects.filter(user_id=request.user.id).delete()
+        
         return Response({
             "client_secret": intent.client_secret,
             "order_id": order.id,
