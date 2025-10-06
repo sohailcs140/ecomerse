@@ -14,7 +14,7 @@ class OrderDetailInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'customer', 'name', 'email', 'order_status', 'payment_type', 'payment_status', 'total_amt', 'added_on']
+    list_display = ['id', 'user', 'name', 'email', 'order_status', 'payment_type', 'payment_status', 'total_amt', 'added_on']
     list_filter = ['order_status', 'payment_type', 'payment_status', 'added_on']
     search_fields = ['name', 'email', 'mobile']
     readonly_fields = ['added_on']

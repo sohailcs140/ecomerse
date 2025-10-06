@@ -6,7 +6,9 @@ from django.db import models
 from django.conf import settings
 from core.models import OrderStatus
 from products.models import Product, ProductAttribute
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 class Order(models.Model):
     """
@@ -23,7 +25,7 @@ class Order(models.Model):
         ('Failed', 'Failed'),
     ]
 
-    customer = models.ForeignKey('customers.Customer', on_delete=models.CASCADE, related_name='orders')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     name = models.CharField(max_length=100)
     email = models.EmailField()
     mobile = models.CharField(max_length=15)

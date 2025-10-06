@@ -20,13 +20,14 @@ class BrandViewSet(viewsets.ModelViewSet):
     """
     Brand viewset with CRUD operations.
     """
-    queryset = Brand.objects.filter(status=True)
+    queryset = Brand.objects.all()
     serializer_class = BrandSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ['name']
     ordering_fields = ['name', 'created_at']
     ordering = ['name']
-
+    pagination_class = None
+    
     def get_permissions(self):
         """Allow public read access, require authentication for write operations."""
         if self.action in ['list', 'retrieve', 'home_brands']:
@@ -87,7 +88,7 @@ class ColorViewSet(viewsets.ModelViewSet):
     """
     Color viewset.
     """
-    queryset = Color.objects.filter(status=True)
+    queryset = Color.objects.all()
     serializer_class = ColorSerializer
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['color']
@@ -107,7 +108,7 @@ class SizeViewSet(viewsets.ModelViewSet):
     """
     Size viewset.
     """
-    queryset = Size.objects.filter(status=True)
+    queryset = Size.objects.all()
     serializer_class = SizeSerializer
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['size']
@@ -127,7 +128,7 @@ class TaxViewSet(viewsets.ModelViewSet):
     """
     Tax viewset.
     """
-    queryset = Tax.objects.filter(status=True)
+    queryset = Tax.objects.all()
     serializer_class = TaxSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
@@ -136,7 +137,7 @@ class CouponViewSet(viewsets.ModelViewSet):
     """
     Coupon viewset.
     """
-    queryset = Coupon.objects.filter(status=True)
+    queryset = Coupon.objects.all()
     serializer_class = CouponSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [SearchFilter]
