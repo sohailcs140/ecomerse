@@ -527,6 +527,22 @@ class Command(BaseCommand):
                     # Create product name based on folder and first image
                     first_image = image_files[0]
                     product_name = f"{product_config['base_name']} - {folder_name.title()}"
+                    # Compute main image path once for reuse
+                    main_image_path = os.path.join(folder_path, first_image)
+
+                    # Ensure category has a representative image
+                    try:
+                        if not skip_images and category and not getattr(category, 'category_image', None):
+                            categories_dir = os.path.join(media_dir, 'categories')
+                            os.makedirs(categories_dir, exist_ok=True)
+                            new_cat_image_name = f"{category.category_slug}_{first_image}"
+                            new_cat_image_path = os.path.join(categories_dir, new_cat_image_name)
+                            shutil.copy2(main_image_path, new_cat_image_path)
+                            category.category_image = f"categories/{new_cat_image_name}"
+                            category.save()
+                            self.stdout.write(f"    🖼️ Set category image: {new_cat_image_name}")
+                    except Exception as e:
+                        self.stdout.write(f"    ❌ Error setting category image: {e}")
                     
                     # Generate unique slug
                     unique_slug = self.generate_unique_slug(product_name)
@@ -559,8 +575,7 @@ class Command(BaseCommand):
                         self.stdout.write(f"  ✅ Created product: {product.name}")
                         
                         # Set main product image (if not skipping images)
-                        if not skip_images:
-                            main_image_path = os.path.join(folder_path, first_image)
+                        if not skip_images and (not getattr(product, 'image', None) or not getattr(product.image, 'name', '')):
                             if os.path.exists(main_image_path):
                                 # Copy image to media/products/ directory
                                 products_dir = os.path.join(media_dir, 'products')
@@ -631,6 +646,20 @@ class Command(BaseCommand):
                                         self.stdout.write(f"    ❌ Error copying gallery image: {e}")
                     else:
                         self.stdout.write(f"  ℹ️ Product already exists: {product.name}")
+                        # If product exists but has no image, set it now (if not skipping images)
+                        try:
+                            if not skip_images and (not getattr(product, 'image', None) or not getattr(product.image, 'name', '')):
+                                if os.path.exists(main_image_path):
+                                    products_dir = os.path.join(media_dir, 'products')
+                                    os.makedirs(products_dir, exist_ok=True)
+                                    new_image_name = f"{product.slug}_{first_image}"
+                                    new_image_path = os.path.join(products_dir, new_image_name)
+                                    shutil.copy2(main_image_path, new_image_path)
+                                    product.image = f'products/{new_image_name}'
+                                    product.save()
+                                    self.stdout.write(f"    📷 Backfilled main image: {new_image_name}")
+                        except Exception as e:
+                            self.stdout.write(f"    ❌ Error backfilling main image: {e}")
         else:
             self.stdout.write(f"  ⚠️ Upload data directory not found: {upload_data_dir}")
 
