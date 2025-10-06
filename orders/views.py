@@ -33,7 +33,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Order.objects.all()
         # For customers, only show their own orders
         try:
-            return Order.objects.filter(customer=self.request.user.customer_profile)
+            return Order.objects.filter(user=self.request.user)
         except:
             return Order.objects.none()
 
@@ -57,7 +57,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         return Response({'error': 'Order status is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], url_path="my-orders")
     def my_orders(self, request):
         """Get current user's orders."""
         orders = self.get_queryset()

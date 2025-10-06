@@ -14,6 +14,7 @@ from .serializers import (
     TaxSerializer, CouponSerializer, HomeBannerSerializer, OrderStatusSerializer, CategoryKpisSerializer
 )
 from .filters import CategoryFilter
+from orders.models import Order
 
 
 class BrandViewSet(viewsets.ModelViewSet):
@@ -145,20 +146,38 @@ class CouponViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['post'], url_path='validate-coupon')
     def validate_coupon(self, request):
         """Validate coupon code."""
+        
         code = request.data.get('code')
         order_amount = request.data.get('order_amount', 0)
-        
+        user = request.user
+
         try:
             coupon = Coupon.objects.get(code=code, status=True)
+            
+            # Check if coupon is one-time and already used by this user
+            if coupon.is_one_time:
+                existing_order = Order.objects.filter(
+                    user=user, 
+                    coupon_code=code
+                ).exists()
+                
+                if existing_order:
+                    return Response({
+                        'valid': False,
+                        'message': 'This coupon has already been used and can only be used once.'
+                    })
+            
+            # Check minimum order amount
             if order_amount < coupon.min_order_amt:
                 return Response({
                     'valid': False, 
-                    'message': f'Minimum order amount is {coupon.min_order_amt}'
+                    'message': f'Minimum order amount is {coupon.min_order_amt} PKR'
                 })
             
+            # Calculate discount
             discount = 0
             if coupon.type == 'Value':
                 discount = coupon.value

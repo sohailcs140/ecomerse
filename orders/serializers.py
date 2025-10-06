@@ -14,13 +14,20 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     Order detail serializer.
     """
     product_name = serializers.CharField(source='product.name', read_only=True)
-    product_image = serializers.CharField(source='product.image.url', read_only=True)
+    product_image = serializers.SerializerMethodField()
     product_attr = ProductAttributeSerializer(read_only=True)
 
     class Meta:
         model = OrderDetail
         fields = '__all__'
 
+    def get_product_image(self, obj):
+        if obj.product.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.product.image.url)
+            return obj.product.image.url
+        return None
 
 class OrderSerializer(serializers.ModelSerializer):
     """
