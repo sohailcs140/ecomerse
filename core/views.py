@@ -1,20 +1,26 @@
 """
 Core views for the ecommerce application.
 """
+from lib2to3.fixes.fix_input import context
 
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.views import APIView
+from rest_framework import status
 
 from .models import Brand, Category, Color, Size, Tax, Coupon, HomeBanner, OrderStatus
 from .serializers import (
     BrandSerializer, CategorySerializer, ColorSerializer, SizeSerializer,
-    TaxSerializer, CouponSerializer, HomeBannerSerializer, OrderStatusSerializer, CategoryKpisSerializer
+    TaxSerializer, CouponSerializer, HomeBannerSerializer, OrderStatusSerializer, CategoryKpisSerializer,
+    DashboardKPISerializer
 )
 from .filters import CategoryFilter
 from orders.models import Order
+from .serializers import OrderStatusOverviewSerializer
+from .enums import KPIPages
 
 
 class BrandViewSet(viewsets.ModelViewSet):
@@ -220,3 +226,50 @@ class OrderStatusViewSet(viewsets.ModelViewSet):
     serializer_class = OrderStatusSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
+
+
+class KPIView(APIView):
+    """
+    Dynamic KPI view — returns KPI data based on the 'page' query parameter.
+    Example:
+      /api/v1/core/kpi/?page=dashboard
+      /api/v1/core/kpi/?page=orders
+      /api/v1/core/kpi/?page=products
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        page = request.query_params.get("page")
+
+        if not page:
+            return Response(
+                {"detail": "Missing 'page' parameter."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serialize_data = self.get_serialize_data(page, request)
+
+        if not serialize_data:
+            return Response(
+                {"detail": f"No KPI available for page '{page}'."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        return Response(serialize_data, status=status.HTTP_200_OK)
+
+
+    def get_serialize_data(self, page, request):
+
+        page = page.lower()
+
+        match page:
+            case KPIPages.DASHBOARD.value:
+                return DashboardKPISerializer(instance={}, context={'request': request}).data
+            case KPIPages.ORDER.value:
+                return OrderStatusOverviewSerializer(OrderStatus.objects.all(), many=True, context={'request': request}).data
+            case KPIPages.PRODUCT.value:
+                from products.serializers import ProductKPISerializer
+                return ProductKPISerializer(instance={}, context={'request': request}).data
+
+        return None

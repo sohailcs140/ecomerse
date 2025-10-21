@@ -7,6 +7,8 @@ from .models import Product, ProductAttribute, ProductImage, ProductReview
 from core.serializers import BrandSerializer, CategorySerializer, ColorSerializer, SizeSerializer, TaxSerializer
 
 
+
+
 class ProductImageSerializer(serializers.ModelSerializer):
     """
     Product image serializer.
@@ -446,3 +448,27 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
             data['attributes'] = []
         
         return data
+
+
+class ProductKPISerializer(serializers.ModelSerializer):
+    feature_count = serializers.SerializerMethodField()
+    total_count = serializers.SerializerMethodField()
+    promo_count = serializers.SerializerMethodField()
+    discounted_count = serializers.SerializerMethodField()
+
+    def get_feature_count(self, obj):
+        return Product.objects.filter(is_featured=True).count()
+
+    def get_total_count(self, obj):
+        return Product.objects.count()
+
+    def get_promo_count(self, obj):
+        return Product.objects.filter(is_promo=True).count()
+
+    def get_discounted_count(self, obj):
+        return Product.objects.filter(is_discounted=True).count()
+
+    class Meta:
+        model = Product
+        fields = ["feature_count", "total_count", "promo_count", "discounted_count"]
+

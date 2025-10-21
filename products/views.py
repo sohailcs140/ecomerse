@@ -1,6 +1,7 @@
 """
 Product views for the ecommerce application.
 """
+from re import search
 
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
@@ -83,6 +84,14 @@ class ProductViewSet(viewsets.ModelViewSet):
         min_price = request.query_params.get('min_price')
         max_price = request.query_params.get('max_price')
         ordering = request.query_params.get("ordering")
+        search = request.query_params.get("search")
+
+        if search:
+            queryset = queryset.filter(
+                Q(name__istartswith=search) |
+                Q(attributes__sku__iexact=search) |
+                Q(model__iexact=search)
+            ).distinct()
 
         if min_price:
             queryset = queryset.filter(attributes__price__gte=min_price)

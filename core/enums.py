@@ -22,3 +22,9 @@ class CouponType(enum.Enum):
     VALUE = "Value"
     PERCENTAGE = "Percentage"
 
+
+class KPIPages(enum.Enum):
+    DASHBOARD = "dashboard"
+    ORDER = "order"
+    PRODUCT = "product"
+

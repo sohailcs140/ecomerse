@@ -6,7 +6,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     BrandViewSet, CategoryViewSet, ColorViewSet, SizeViewSet,
-    TaxViewSet, CouponViewSet, HomeBannerViewSet, OrderStatusViewSet
+    TaxViewSet, CouponViewSet, HomeBannerViewSet, OrderStatusViewSet, KPIView
 )
 
 router = DefaultRouter()
@@ -21,4 +21,5 @@ router.register(r'order-status', OrderStatusViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path("kpis/", KPIView.as_view(), name="kpis")
 ]

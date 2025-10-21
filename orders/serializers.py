@@ -34,13 +34,21 @@ class OrderSerializer(serializers.ModelSerializer):
     Order serializer.
     """
     order_details = OrderDetailSerializer(many=True, read_only=True)
-    customer_name = serializers.CharField(source='customer.name', read_only=True)
+    customer = serializers.SerializerMethodField()
     order_status_name = serializers.CharField(source='order_status.orders_status', read_only=True)
 
     class Meta:
         model = Order
         fields = '__all__'
         read_only_fields = ['customer', 'added_on']
+
+    def get_customer(self, instance):
+        return {
+            "name": instance.user.first_name or "" + instance.user.last_name or "",
+            "phone": instance.user.mobile,
+            "email": instance.user.email
+        }
+
 
 class CartProductSerializer(serializers.ModelSerializer):
 
@@ -74,3 +82,5 @@ class CartAddSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = ['user_id', 'user_type', 'qty', 'product', 'product_attr']
+
+

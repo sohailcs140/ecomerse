@@ -3,8 +3,12 @@ Core serializers for the ecommerce application.
 """
 
 from rest_framework import serializers
-from .models import Brand, Category, Color, Size, Tax, Coupon, HomeBanner, OrderStatus
+from .models import Brand, Category, Color, Size, Tax, Coupon, HomeBanner,OrderStatus
 from django.db import models
+from django.utils import timezone
+from django.apps import apps
+from orders.models import Order
+from django.db.models import Sum
 
 class BrandSerializer(serializers.ModelSerializer):
     """
@@ -104,3 +108,114 @@ class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderStatus
         fields = '__all__'
+
+
+class OrderStatusOverviewSerializer(serializers.Serializer):
+    """
+    Order status overview serializer.
+    """
+    order_status = serializers.SerializerMethodField()
+    order_status_count = serializers.SerializerMethodField()
+    def get_order_status(self, obj):
+        return obj.orders_status
+
+    def get_order_status_count(self, obj):
+        return Order.objects.filter(order_status=obj).count()
+
+
+
+class DashboardKPISerializer(serializers.Serializer):
+    """
+    Dashboard KPI serializer.
+    """
+    total_products_count = serializers.SerializerMethodField()
+    total_orders_count = serializers.SerializerMethodField()
+    total_revenue = serializers.SerializerMethodField()
+    low_stock_alert_count = serializers.SerializerMethodField()
+    last_month_revenue = serializers.SerializerMethodField()
+    this_month_revenue = serializers.SerializerMethodField()
+    revenue_growth = serializers.SerializerMethodField()
+    recent_orders = serializers.SerializerMethodField()
+    order_status_overview = serializers.SerializerMethodField()
+    low_stock_products = serializers.SerializerMethodField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.Product = apps.get_model('products', 'Product')
+        self.Order = apps.get_model('orders', 'Order')
+        self.OrderStatus = apps.get_model('core', 'OrderStatus')
+        from products.serializers import ProductDetailSerializer
+        self.ProductDetailSerializer = ProductDetailSerializer
+
+    # --- Product KPIs ---
+    def get_low_stock_products(self, obj):
+        """Return list of products whose total stock (sum of all attributes) is below 10."""
+        # from products.serializers import ProductSerializer
+        low_stock_products = (
+            self.Product.objects
+            .annotate(total_qty=models.Sum('attributes__qty'))
+            .filter(total_qty__lt=5)
+        )
+        return self.ProductDetailSerializer(low_stock_products, many=True).data
+
+    def get_low_stock_alert_count(self, obj):
+        """Count how many products have low stock."""
+        return (
+            self.Product.objects
+            .annotate(total_qty=models.Sum('attributes__qty'))
+            .filter(total_qty__lt=5)
+            .count()
+        )
+
+    def get_total_products_count(self, obj):
+        return self.Product.objects.count()
+
+    # --- Order KPIs ---
+    def get_recent_orders(self, obj):
+        from orders.serializers import OrderSerializer
+        return OrderSerializer(
+            self.Order.objects.order_by('-added_on')[:10], many=True
+        ).data
+
+    def get_total_orders_count(self, obj):
+        return self.Order.objects.count()
+
+    def get_total_revenue(self, obj):
+        return (
+            self.Order.objects.aggregate(total_revenue=models.Sum('total_amt'))
+            .get('total_revenue') or 0
+        )
+
+    # --- Revenue KPIs ---
+    def get_last_month_revenue(self, obj):
+        now = timezone.now()
+        last_month = now.month - 1 or 12
+        year = now.year if now.month > 1 else now.year - 1
+        return (
+            self.Order.objects.filter(added_on__year=year, added_on__month=last_month)
+            .aggregate(total_revenue=models.Sum('total_amt'))
+            .get('total_revenue') or 0
+        )
+
+    def get_this_month_revenue(self, obj):
+        now = timezone.now()
+        return (
+            self.Order.objects.filter(added_on__year=now.year, added_on__month=now.month)
+            .aggregate(total_revenue=models.Sum('total_amt'))
+            .get('total_revenue') or 0
+        )
+
+    def get_revenue_growth(self, obj):
+        last = self.get_last_month_revenue(obj)
+        this = self.get_this_month_revenue(obj)
+
+        if last == 0 and this > 0:
+            return 100.0
+        elif last == 0 and this == 0:
+            return 0.0
+        return ((this - last) / last) * 100
+
+    # --- Order Status Overview ---
+    def get_order_status_overview(self, obj):
+        from .serializers import OrderStatusOverviewSerializer
+        return OrderStatusOverviewSerializer(self.OrderStatus.objects.all(), many=True).data
