@@ -146,7 +146,7 @@ class DashboardKPISerializer(serializers.Serializer):
         self.OrderStatus = apps.get_model('core', 'OrderStatus')
         from products.serializers import ProductDetailSerializer
         self.ProductDetailSerializer = ProductDetailSerializer
-
+        self.request = self.context.get("request")
     # --- Product KPIs ---
     def get_low_stock_products(self, obj):
         """Return list of products whose total stock (sum of all attributes) is below 10."""
@@ -156,7 +156,7 @@ class DashboardKPISerializer(serializers.Serializer):
             .annotate(total_qty=models.Sum('attributes__qty'))
             .filter(total_qty__lt=5)
         )
-        return self.ProductDetailSerializer(low_stock_products, many=True).data
+        return self.ProductDetailSerializer(low_stock_products, many=True, context={'request': self.request}).data
 
     def get_low_stock_alert_count(self, obj):
         """Count how many products have low stock."""

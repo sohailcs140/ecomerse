@@ -1,8 +1,3 @@
-"""
-Product views for the ecommerce application.
-"""
-from re import search
-
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
